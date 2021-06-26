@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title></title>
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      background-color: black;
+    }
+    #scene {
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
+      box-sizing: border-box;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+    }
+    .sprite-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
+      box-sizing: border-box;
+    }
+    .sprite {
+      box-sizing: content-box;
+      background-position: 0 0;
+      background-repeat: no-repeat;
+      background-size: 1600%;
+      margin: 1rem;
+      padding: 0;
+      /*
+       416 - 20
+       234 - x
+       x = 234 * 20 / 416 = 11.25
+      */
+       width: 11.25vh;
+       height: 20vh;
+       }
+       #sprite-01 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-02 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-03 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-04 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-05 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-06 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-07 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-08 {
+         background-image: url("sprite_01.jpg");
+       }
+       #sprite-09 {
+         background-image: url("sprite_01.jpg");
+       }
+       #scrolling-layer {
+         height: 300vh;
+       }
+</style>
+</head>
+<body>
+<div id="scene">
+  <div class="sprite-row">
+    <div id="sprite-01" class="sprite"></div>
+    <div id="sprite-02" class="sprite"></div>
+    <div id="sprite-03" class="sprite"></div>
+  </div>
+  <div class="sprite-row">
+    <div id="sprite-04" class="sprite"></div>
+    <div id="sprite-05" class="sprite"></div>
+    <div id="sprite-06" class="sprite"></div>
+  </div>
+  <div class="sprite-row">
+    <div id="sprite-07" class="sprite"></div>
+    <div id="sprite-08" class="sprite"></div>
+    <div id="sprite-09" class="sprite"></div>
+  </div>
+</div>
+<div id="scrolling-layer"></div>
+<script>
+  (function() {
+
+    const getVerticalScrollPercentage = (el) => {
+      const p = el.parentNode
+      return (el.scrollTop || p.scrollTop) / (p.scrollHeight - p.clientHeight) * 100
+    }
+
+    const selectSpriteIndexToDisplay = (percentage, scene) => {
+      return Math.min(
+          Math.floor(percentage / scene.scrollStep),
+          scene.overallNum - 1
+      );
+    }
+
+    const selectBackgroundPositionForSpriteIndex = (index, scene) => {
+      const row = Math.floor(index / scene.columns);
+      const column = Math.floor(index % scene.columns);
+      return {
+        row: row,
+        column: column,
+      }
+    }
+
+    const scene = {
+      spriteSheetWidth: 3744, // in px
+      spriteSheetHeight: 3744, // in px
+      spriteWidth: 3744 / 16, // in px
+      spriteHeight: 3744 / 9, // in px
+      columns: 16,
+      rows: 9,
+      overallNum: 130,
+      scrollStep: 100 / 130
+    }
+
+    const allSpriteElements = document.querySelectorAll(".sprite");
+    let visibleSpriteIndex = 0;
+    let currentSpriteIndex = 0;
+    let currentSpriteRow = 0;
+    let currentSpriteColumn = 0;
+
+    const updateScene = () => {
+      if (visibleSpriteIndex !== currentSpriteIndex) {
+        const px = (currentSpriteColumn * scene.spriteWidth) / (scene.spriteSheetWidth - scene.spriteWidth) * 100;
+        const py = (currentSpriteRow * scene.spriteHeight) / (scene.spriteSheetHeight - scene.spriteHeight) * 100;
+        for (const x of allSpriteElements) {
+            x.style.backgroundPositionX = `${px}%`;
+            x.style.backgroundPositionY = `${py}%`;
+        }
+        visibleSpriteIndex = currentSpriteIndex;
+      }
+      requestAnimationFrame(updateScene)
+    }
+    const onScroll = () => {
+      const p = getVerticalScrollPercentage(document.body);
+      currentSpriteIndex = selectSpriteIndexToDisplay(p, scene);
+      const x = selectBackgroundPositionForSpriteIndex(currentSpriteIndex, scene);
+      currentSpriteRow = x.row;
+      currentSpriteColumn = x.column;
+    }
+    document.addEventListener("scroll", onScroll);
+    requestAnimationFrame(updateScene);
+  })();
+</script>
+</body>
+</html>
